@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'needle_alignment_page.dart';  // Import your NeedleAlignmentPage
+import 'needle_alignment_page.dart'; // Import your NeedleAlignmentPage
 import 'waterman_smith_page.dart';  // Import your WatermanSmithPage
-
+import 'feedbackpage.dart'; // Import your FeedbackPage
+String? loggedInUser; // Declare it globally
 void main() => runApp(SeqAlignApp());
 
 class SeqAlignApp extends StatelessWidget {
@@ -17,6 +18,7 @@ class SeqAlignApp extends StatelessWidget {
         '/': (context) => HomePage(),
         '/needle': (context) => NeedleAlignmentPage(),  // Navigate to Needleman-Wunsch
         '/waterman': (context) => WatermanSmithPage(),  // Navigate to Smith-Waterman
+        '/feedback': (context) => FeedbackPage(), // Navigate to Feedback Page
       },
     );
   }
@@ -50,6 +52,22 @@ class HomePage extends StatelessWidget {
                 Navigator.pushNamed(context, '/waterman'); // Navigate to Smith-Waterman
               },
               child: Text('Smith-Waterman Alignment'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Feedback page only accessible if logged in
+                if (loggedInUser != null) {
+                  Navigator.pushNamed(context, '/feedback');
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please log in to provide feedback'),
+                    ),
+                  );
+                }
+              },
+              child: Text('Provide Feedback'),
             ),
           ],
         ),
