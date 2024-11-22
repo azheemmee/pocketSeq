@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'homepage.dart'; // Assuming you have the SeqAlignApp defined in homepage.dart
-import 'feedbackpage.dart'; // Import your FeedbackPage
 
 String? loggedInUser; // Null means no user is logged in
 
@@ -38,10 +37,16 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text;
 
     if (users.containsKey(email) && users[email] == password) {
-      loggedInUser = email; // Set the logged-in user
+      setState(() {
+        loggedInUser = email; // Set the logged-in user globally
+      });
+
+      // Pass the logged-in state to SeqAlignApp
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SeqAlignApp()),
+        MaterialPageRoute(
+          builder: (context) => SeqAlignApp(loggedInUser: loggedInUser),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -61,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
     loggedInUser = null; // No user is logged in as a guest
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => SeqAlignApp()),
+      MaterialPageRoute(builder: (context) => SeqAlignApp(loggedInUser: loggedInUser)),
     );
   }
 

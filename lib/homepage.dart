@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'needle_alignment_page.dart'; // Import your NeedleAlignmentPage
 import 'waterman_smith_page.dart';  // Import your WatermanSmithPage
 import 'feedbackpage.dart'; // Import your FeedbackPage
-String? loggedInUser; // Declare it globally
-void main() => runApp(SeqAlignApp());
 
+// The constructor of SeqAlignApp now accepts loggedInUser as a parameter
 class SeqAlignApp extends StatelessWidget {
+  final String? loggedInUser; // Accept loggedInUser as a named parameter
+
+  const SeqAlignApp({super.key, this.loggedInUser});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,16 +18,19 @@ class SeqAlignApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(),
-        '/needle': (context) => NeedleAlignmentPage(),  // Navigate to Needleman-Wunsch
-        '/waterman': (context) => WatermanSmithPage(),  // Navigate to Smith-Waterman
-        '/feedback': (context) => FeedbackPage(), // Navigate to Feedback Page
+        '/': (context) => HomePage(loggedInUser: loggedInUser), // Pass loggedInUser to HomePage
+        '/waterman': (context) => WatermanSmithPage(),
+        '/feedback': (context) => FeedbackPage(),
       },
     );
   }
 }
 
 class HomePage extends StatelessWidget {
+  final String? loggedInUser; // Accept loggedInUser as a parameter
+
+  const HomePage({super.key, this.loggedInUser});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,26 +48,34 @@ class HomePage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/needle'); // Navigate to Needleman-Wunsch
+                // Navigate to NeedleAlignmentPage, passing the login status dynamically
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        NeedleAlignmentPage(isLoggedIn: loggedInUser != null),
+                  ),
+                );
               },
               child: Text('Needle Sequence Alignment'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/waterman'); // Navigate to Smith-Waterman
+                // Navigate to Smith-Waterman page
+                Navigator.pushNamed(context, '/waterman');
               },
               child: Text('Smith-Waterman Alignment'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Feedback page only accessible if logged in
+                // Feedback only accessible for logged-in users
                 if (loggedInUser != null) {
                   Navigator.pushNamed(context, '/feedback');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text('Please log in to provide feedback'),
                     ),
                   );
@@ -69,6 +83,17 @@ class HomePage extends StatelessWidget {
               },
               child: Text('Provide Feedback'),
             ),
+            SizedBox(height: 20),
+            if (loggedInUser != null)
+              Text(
+                "Logged in as: $loggedInUser",
+                style: TextStyle(color: Colors.green),
+              )
+            else
+              Text(
+                "You are currently logged in as a guest",
+                style: TextStyle(color: Colors.red),
+              ),
           ],
         ),
       ),
