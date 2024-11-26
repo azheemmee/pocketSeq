@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'needle_alignment_page.dart'; // Import your NeedleAlignmentPage
 import 'waterman_smith_page.dart';  // Import your WatermanSmithPage
 import 'feedbackpage.dart'; // Import your FeedbackPage
+import 'alignment_history_page.dart'; // Import your AlignmentHistoryPage
 
-// The constructor of SeqAlignApp now accepts loggedInUser as a parameter
 class SeqAlignApp extends StatelessWidget {
   final String? loggedInUser; // Accept loggedInUser as a named parameter
 
@@ -21,6 +21,9 @@ class SeqAlignApp extends StatelessWidget {
         '/': (context) => HomePage(loggedInUser: loggedInUser), // Pass loggedInUser to HomePage
         '/waterman': (context) => WatermanSmithPage(),
         '/feedback': (context) => FeedbackPage(),
+        '/history': (context) => AlignmentHistoryPage(
+              username: loggedInUser ?? "Guest", // Pass loggedInUser to AlignmentHistoryPage
+            ),
       },
     );
   }
@@ -82,6 +85,22 @@ class HomePage extends StatelessWidget {
                 }
               },
               child: Text('Provide Feedback'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to Alignment History page if user is logged in
+                if (loggedInUser != null) {
+                  Navigator.pushNamed(context, '/history');
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please log in to view history.'),
+                    ),
+                  );
+                }
+              },
+              child: Text('View Alignment History'),
             ),
             SizedBox(height: 20),
             if (loggedInUser != null)

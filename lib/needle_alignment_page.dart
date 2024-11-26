@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'history.dart'; // Import the History Page
+import 'package:shared_preferences/shared_preferences.dart';
+import 'history.dart'; // Assuming you have HistoryPage already
 
 String? loggedInUser;
 
 class NeedleAlignmentPage extends StatefulWidget {
-  final bool isLoggedIn; // Determines if the user is logged in
+  final bool isLoggedIn;
 
   const NeedleAlignmentPage({Key? key, required this.isLoggedIn}) : super(key: key);
 
@@ -19,45 +20,49 @@ class _NeedleAlignmentPageState extends State<NeedleAlignmentPage> {
   final TextEditingController _gapPenaltyController = TextEditingController();
   final TextEditingController _mismatchPenaltyController = TextEditingController();
 
-  void calculateAlignment() {
+  String? alignedSeq1;
+  String? alignedSeq2;
+  int? alignmentScore;
+
+  // Calculate the alignment
+  void calculateAlignment() async {
     String seq1 = _seq1Controller.text.trim();
     String seq2 = _seq2Controller.text.trim();
 
-    // Validate input sequences
     if (seq1.isEmpty || seq2.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter both sequences.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter both sequences.')));
       return;
     }
 
-    // Parse scoring inputs or use default values
     int matchScore = int.tryParse(_matchScoreController.text) ?? 1;
     int mismatchPenalty = int.tryParse(_mismatchPenaltyController.text) ?? -2;
     int gapPenalty = int.tryParse(_gapPenaltyController.text) ?? -2;
 
-    // Perform Needleman-Wunsch alignment
-    var result =
-        needlemanWunsch(seq1, seq2, matchScore, mismatchPenalty, gapPenalty);
+    var result = needlemanWunsch(seq1, seq2, matchScore, mismatchPenalty, gapPenalty);
 
-    // Redirect for logged-in users or display result for guests
+    // Show the aligned sequences on the current page
+    setState(() {
+      alignedSeq1 = result['alignedSeq1'];
+      alignedSeq2 = result['alignedSeq2'];
+      alignmentScore = result['alignmentScore'];
+    });
+
+    // Save the result to shared preferences if the user is logged in
     if (widget.isLoggedIn) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HistoryPage(
-            alignmentResult: result,
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            "Aligned Sequences:\n${result['alignedSeq1']}\n${result['alignedSeq2']}"),
-      ));
+      // Get the logged-in user (if any) from SharedPreferences or use 'guest' as default
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String key = "alignment_history_${loggedInUser ?? 'guest'}";  // Same key used when loading the history
+
+      // Save the alignment history
+      List<String> history = prefs.getStringList(key) ?? [];
+      history.add("${result['alignedSeq1']} | ${result['alignedSeq2']} | Score: ${result['alignmentScore']}");
+      await prefs.setStringList(key, history);
+
+      print('Saving history for user: ${loggedInUser ?? 'guest'}');  // Print key for debugging
     }
   }
 
+  // Needleman-Wunsch algorithm implementation
   Map<String, dynamic> needlemanWunsch(
       String seq1, String seq2, int matchScore, int mismatchPenalty, int gapPenalty) {
     int n = seq1.length + 1;
@@ -122,9 +127,7 @@ class _NeedleAlignmentPageState extends State<NeedleAlignmentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Needle Sequence Alignment"),
-      ),
+      appBar: AppBar(title: Text("Needle Sequence Alignment")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -159,6 +162,16 @@ class _NeedleAlignmentPageState extends State<NeedleAlignmentPage> {
               onPressed: calculateAlignment,
               child: Text("Calculate Alignment"),
             ),
+            SizedBox(height: 20),
+            if (alignedSeq1 != null && alignedSeq2 != null)
+              Column(
+                children: [
+                  Text("Aligned Sequences:"),
+                  Text("Seq 1: $alignedSeq1"),
+                  Text("Seq 2: $alignedSeq2"),
+                  Text("Alignment Score: $alignmentScore"),
+                ],
+              ),
             SizedBox(height: 20),
             if (!widget.isLoggedIn)
               Text(

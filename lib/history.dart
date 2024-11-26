@@ -8,31 +8,20 @@ class HistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Alignment History"),
-      ),
+      appBar: AppBar(title: Text("Alignment Details")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Aligned Sequences:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            Text("Aligned Sequences:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Text("Sequence 1: ${alignmentResult['alignedSeq1']}"),
             Text("Sequence 2: ${alignmentResult['alignedSeq2']}"),
             SizedBox(height: 20),
-            Text(
-              "Alignment Score: ${alignmentResult['alignmentScore']}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+            Text("Alignment Score: ${alignmentResult['alignmentScore']}", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 20),
-            Text(
-              "Score Matrix:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            Text("Score Matrix:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Expanded(
               child: SingleChildScrollView(
@@ -43,8 +32,7 @@ class HistoryPage extends StatelessWidget {
                             children: row
                                 .map<Widget>((cell) => Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text(cell.toString(),
-                                          textAlign: TextAlign.center),
+                                      child: Text(cell.toString(), textAlign: TextAlign.center),
                                     ))
                                 .toList(),
                           ))
